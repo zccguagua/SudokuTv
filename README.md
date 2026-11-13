@@ -1,0 +1,93 @@
+# 数独（题库版）
+
+一款面向 Android TV、横屏手机和平板的离线九宫数独做题应用。题目来自
+[Sudoku Exchange Puzzle Bank](https://github.com/grantm/sudoku-exchange-puzzle-bank)（公有领域），
+运行时不联网、不登录、不收集数据。
+
+## 功能
+
+- 九宫数独，四档难度：简单 / 中等 / 困难 / 专家
+- 首页选择难度：有存档继续上次一局，没有存档随机开一题
+- 关卡选择：先选难度，再用屏幕数字键盘输入题号，跳到指定题目
+- 题目界面显示难度、题号与题库评分（如 `8.3`）
+- 填满最后一格后自动按数独规则校验；多解题也按行、列、宫判定
+- 空格支持预选数字（每格最多 4 个，显示在四角）
+- 遥控器与触摸屏操作一致
+- 一键「清除填写」，只清玩家填写与预选，不动题面与计时
+- 「下一题」随时切换同难度随机题，重新计时
+- 每个难度保留一局未完成进度；每个难度保留最快 10 次成绩
+- 完全离线，无广告、无音效
+
+## 题库
+
+全部题目来自 [Sudoku Exchange Puzzle Bank](https://github.com/grantm/sudoku-exchange-puzzle-bank)，
+该数据集由 QQWing 生成、Sukaku Explainer 评分，属于公有领域（Public Domain）。
+
+题库已作为**固定数据**转换并打包在应用内（`app/src/main/assets/bank/*.bin`，约 35.8 MiB），
+后续不再新增或替换题目，因此项目里不保留题库转换流程，构建也不需要任何外部仓库。
+
+## 难度与题号
+
+| 难度 | 题库文件 | 评分范围 | 题数 |
+|---|---|---|---:|
+| 简单 | `easy.txt` | 1.2 | 100,000 |
+| 中等 | `medium.txt` | 1.5 – 2.3 | 352,643 |
+| 困难 | `hard.txt` | 2.5 – 4.8 | 321,592 |
+| 专家 | `diabolical.txt` | 5.0 – 9.3 | 119,681 |
+
+题号是该难度题库文件的行号（从 1 开始）。例如「专家 · 第 119681 题」对应
+`diabolical.txt` 第 119681 行。不同难度下相同的题号是完全不同的题目。
+
+## 遥控器操作
+
+| 场景 | 按键 | 行为 |
+|---|---|---|
+| 首页 | 方向键 / 确定 | 选择难度卡片或底部按钮 |
+| 棋盘 | 方向键 | 移动光标 |
+| 棋盘 | 确定 | 打开数字面板（题面已知格除外） |
+| 棋盘 | 菜单 | 给空格添加预选数字 |
+| 棋盘 | 右方向键（最右列） | 进入右侧「清除填写 / 下一题」按钮区 |
+| 按钮区 | 上下 / 确定 / 左 | 切换按钮、执行、回到棋盘 |
+| 面板 | 方向键 / 确定 / 菜单 / 返回 | 填数、清除、切换预选、放弃 |
+| 任意 | 返回 | 关闭面板或回到首页（自动保存） |
+
+数字面板默认聚焦 5；从数字最底行按下可选中「清除」。
+
+## 触摸操作
+
+- 点按难度卡片开局，点按按钮执行
+- 点按可填写格打开数字面板；长按空格打开预选面板
+- 点按面板外部关闭；面板底部「清除」清空当前格
+- 关卡选择支持点按键盘与按钮
+
+## 构建
+
+环境要求：JDK 17、Android SDK 35。
+
+项目是自包含的：题库已经是固定数据并随仓库提交（`app/src/main/assets/bank/*.bin`，
+合计约 35.8 MiB），克隆后直接构建即可，**不需要**另外克隆题库仓库，也没有题库生成步骤。
+
+```bash
+./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease
+```
+
+输出：
+
+```text
+app/build/outputs/apk/release/app-release.apk
+```
+
+## 安装到电视
+
+```bash
+adb connect <电视IP>:5555
+adb -s <电视IP>:5555 install -r app/build/outputs/apk/release/app-release.apk
+adb -s <电视IP>:5555 shell cmd package compile -m speed -f com.zcc.sudokutv
+```
+
+覆盖安装即可，不要卸载或清数据，否则会丢失成绩与未完成进度。
+
+## 数据来源与许可
+
+- 题库：[Sudoku Exchange Puzzle Bank](https://github.com/grantm/sudoku-exchange-puzzle-bank)，公有领域，见 `NOTICE.md`
+- 应用代码：沿用 `sudoku-assistant-tv` 的九宫做题交互与视觉风格
