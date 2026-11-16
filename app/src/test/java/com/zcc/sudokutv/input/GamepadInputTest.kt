@@ -37,7 +37,7 @@ class GamepadInputTest {
 
         assertEquals(
             listOf(
-                KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_MENU,
                 KeyEvent.KEYCODE_ENTER,
                 KeyEvent.KEYCODE_MENU,
                 KeyEvent.KEYCODE_MENU,
@@ -48,15 +48,15 @@ class GamepadInputTest {
 
     @Test
     fun repeatedKeyDownIsIgnored() {
-        down(KeyEvent.KEYCODE_BUTTON_A)
-        down(KeyEvent.KEYCODE_BUTTON_A, repeat = 1)
-        down(KeyEvent.KEYCODE_BUTTON_A)
+        down(KeyEvent.KEYCODE_BUTTON_B)
+        down(KeyEvent.KEYCODE_BUTTON_B, repeat = 1)
+        down(KeyEvent.KEYCODE_BUTTON_B)
         assertEquals(listOf(KeyEvent.KEYCODE_ENTER), dispatched)
     }
 
     @Test
     fun secondKeyCodeFromOnePressIsCollapsed() {
-        down(KeyEvent.KEYCODE_BUTTON_A)
+        down(KeyEvent.KEYCODE_BUTTON_B)
         clock += 5
         down(KeyEvent.KEYCODE_DPAD_CENTER)
         assertEquals(listOf(KeyEvent.KEYCODE_ENTER), dispatched)
@@ -64,8 +64,8 @@ class GamepadInputTest {
 
     @Test
     fun separatePressesAfterTheWindowBothFire() {
-        down(KeyEvent.KEYCODE_BUTTON_A)
-        up(KeyEvent.KEYCODE_BUTTON_A)
+        down(KeyEvent.KEYCODE_BUTTON_B)
+        up(KeyEvent.KEYCODE_BUTTON_B)
         clock += 200
         down(KeyEvent.KEYCODE_DPAD_CENTER)
         assertEquals(listOf(KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_ENTER), dispatched)
@@ -79,9 +79,25 @@ class GamepadInputTest {
     }
 
     @Test
-    fun dpadButtonsFallThroughToTheNormalPath() {
-        assertFalse(down(KeyEvent.KEYCODE_DPAD_UP))
+    fun gamepadDpadKeyEventMovesViaDirectionPath() {
+        assertTrue(down(KeyEvent.KEYCODE_DPAD_UP))
+        assertTrue(up(KeyEvent.KEYCODE_DPAD_UP))
+        assertEquals(listOf(KeyEvent.KEYCODE_DPAD_UP), dispatched)
+    }
+
+    @Test
+    fun remoteDpadKeysAreNotIntercepted() {
+        assertFalse(down(KeyEvent.KEYCODE_DPAD_UP, InputDevice.SOURCE_DPAD))
         assertTrue(dispatched.isEmpty())
+    }
+
+    @Test
+    fun dpadKeyEventAndHatAreDeduplicated() {
+        down(KeyEvent.KEYCODE_DPAD_UP)
+        input.updateAxes(0f, -1f, 0f, 0f)
+        up(KeyEvent.KEYCODE_DPAD_UP)
+        input.updateAxes(0f, 0f, 0f, 0f)
+        assertEquals(listOf(KeyEvent.KEYCODE_DPAD_UP), dispatched)
     }
 
     @Test
@@ -97,9 +113,9 @@ class GamepadInputTest {
     }
 
     @Test
-    fun stickUsesDeadZone() {
-        input.updateAxes(0f, 0f, 0.4f, 0f)
-        input.updateAxes(0f, 0f, 0.8f, 0f)
+    fun stickUsesThreshold() {
+        input.updateAxes(0f, 0f, 0.2f, 0f)
+        input.updateAxes(0f, 0f, 0.5f, 0f)
         assertEquals(listOf(KeyEvent.KEYCODE_DPAD_RIGHT), dispatched)
     }
 
@@ -111,10 +127,10 @@ class GamepadInputTest {
 
     @Test
     fun resetClearsHeldButtons() {
-        down(KeyEvent.KEYCODE_BUTTON_A)
+        down(KeyEvent.KEYCODE_BUTTON_B)
         input.reset()
         clock += 10
-        down(KeyEvent.KEYCODE_BUTTON_A)
+        down(KeyEvent.KEYCODE_BUTTON_B)
         assertEquals(listOf(KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_ENTER), dispatched)
     }
 }

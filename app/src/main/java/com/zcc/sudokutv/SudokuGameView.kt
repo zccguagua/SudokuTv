@@ -77,6 +77,8 @@ class SudokuGameView(context: Context, private val exitApp: () -> Unit) : View(c
     private var incorrectCells = emptySet<Int>()
     private var statusMessage: String? = null
     private var sideFocus = SideFocus.NONE
+    private var confirmClearOpen = false
+    private var confirmClearSelected = false
     private var rewardFocus = 1
 
     private var pickerOpen = false
@@ -524,6 +526,7 @@ class SudokuGameView(context: Context, private val exitApp: () -> Unit) : View(c
         candidateMasks = IntArray(CELL_COUNT)
         incorrectCells = emptySet()
         pickerOpen = false
+        confirmClearOpen = false
         statusMessage = "已清除所有填写"
         sideFocus = SideFocus.NONE
     }
@@ -542,6 +545,19 @@ class SudokuGameView(context: Context, private val exitApp: () -> Unit) : View(c
 
     private fun handleGameKey(keyCode: Int): Boolean {
         val current = puzzle ?: return false
+        if (confirmClearOpen) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_LEFT -> confirmClearSelected = false
+                KeyEvent.KEYCODE_DPAD_RIGHT -> confirmClearSelected = true
+                KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                    if (confirmClearSelected) clearAllEntries()
+                    confirmClearOpen = false
+                }
+                KeyEvent.KEYCODE_BACK -> confirmClearOpen = false
+                else -> return true
+            }
+            return true
+        }
         if (pickerOpen) return handlePickerKey(keyCode)
 
         if (sideFocus != SideFocus.NONE) {
@@ -549,7 +565,12 @@ class SudokuGameView(context: Context, private val exitApp: () -> Unit) : View(c
                 KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN ->
                     sideFocus = if (sideFocus == SideFocus.CLEAR_ALL) SideFocus.NEXT else SideFocus.CLEAR_ALL
                 KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
-                    if (sideFocus == SideFocus.CLEAR_ALL) clearAllEntries() else nextPuzzle()
+                    if (sideFocus == SideFocus.CLEAR_ALL) {
+                        confirmClearOpen = true
+                        confirmClearSelected = false
+                    } else {
+                        nextPuzzle()
+                    }
                 }
                 KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_BACK -> sideFocus = SideFocus.NONE
                 else -> return false
@@ -582,10 +603,23 @@ class SudokuGameView(context: Context, private val exitApp: () -> Unit) : View(c
 
     private fun handleGameTap(x: Float, y: Float): Boolean {
         val current = puzzle ?: return false
+        if (confirmClearOpen) {
+            if (confirmClearCancelRect.contains(x, y)) {
+                confirmClearOpen = false
+                return true
+            }
+            if (confirmClearConfirmRect.contains(x, y)) {
+                clearAllEntries()
+                confirmClearOpen = false
+                return true
+            }
+            return true
+        }
         if (pickerOpen) return handlePickerTap(x, y)
 
         if (clearAllRect.contains(x, y)) {
-            clearAllEntries()
+            confirmClearOpen = true
+            confirmClearSelected = false
             return true
         }
         if (nextPuzzleRect.contains(x, y)) {
@@ -938,6 +972,17 @@ class SudokuGameView(context: Context, private val exitApp: () -> Unit) : View(c
         actionButton(canvas, 936f, 588f, 1435f, 710f, "退出应用", exitSelected, exitSelected)
     }
 
+    private fun drawConfirmClearDialog(canvas: Canvas) {
+        paint.color = Color.argb(215, 8, 19, 29)
+        canvas.drawRect(0f, 0f, 1920f, 1080f, paint)
+        rounded(canvas, 390f, 300f, 1530f, 782f, 32f, panel)
+        strokeRound(canvas, 390f, 300f, 1530f, 782f, 32f, panelLight, 4f)
+        textCenter(canvas, "清除所有填写？", 960f, 430f, 52f, cream, true)
+        textCenter(canvas, "将清空你的所有填写和预选数字。", 960f, 510f, 30f, muted)
+        actionButton(canvas, 485f, 588f, 904f, 710f, "取消", !confirmClearSelected, !confirmClearSelected)
+        actionButton(canvas, 936f, 588f, 1435f, 710f, "清除", confirmClearSelected, confirmClearSelected)
+    }
+
     private fun drawLevelSelect(canvas: Canvas) {
         text(canvas, "关卡选择", 96f, 110f, 54f, cream, true)
         text(canvas, "题号 = 该难度题库的行号，同一题号在不同难度下是不同题目", 96f, 700f, 25f, muted)
@@ -1084,6 +1129,7 @@ class SudokuGameView(context: Context, private val exitApp: () -> Unit) : View(c
         text(canvas, "返回首页自动保存进度", 1165f, 970f, 25f, muted)
 
         if (pickerOpen) drawPicker(canvas)
+        if (confirmClearOpen) drawConfirmClearDialog(canvas)
     }
 
     private fun drawPicker(canvas: Canvas) {
@@ -1183,6 +1229,8 @@ class SudokuGameView(context: Context, private val exitApp: () -> Unit) : View(c
 
     private val clearAllRect: RectF get() = RectF(1165f, 400f, 1480f, 520f)
     private val nextPuzzleRect: RectF get() = RectF(1495f, 400f, 1824f, 520f)
+    private val confirmClearCancelRect: RectF get() = RectF(485f, 588f, 904f, 710f)
+    private val confirmClearConfirmRect: RectF get() = RectF(936f, 588f, 1435f, 710f)
 
     private fun optionCard(
         canvas: Canvas, l: Float, t: Float, r: Float, b: Float,
