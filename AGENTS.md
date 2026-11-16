@@ -23,7 +23,7 @@
 | `app/src/main/java/com/zcc/sudokutv/data/PuzzleBank.kt` | `AssetManager.openFd` 随机读取题库 |
 | `app/src/main/java/com/zcc/sudokutv/data/ScoreRepository.kt` | 每个难度最快 10 次成绩 |
 | `app/src/main/java/com/zcc/sudokutv/data/ProgressRepository.kt` | 每个难度一局未完成存档 + `latest` 指针 |
-| `app/src/main/assets/bank/*.bin` | 固定题库二进制，**随仓库提交**（约 35.8 MiB），不再提供生成流程 |
+| `app/src/main/assets/bank/*.bin` | 固定题库二进制，**随仓库提交**（每难度前 20000 题，各 840,000 字节，共约 3.2 MiB），不再提供生成流程 |
 | `app/src/test/java/com/zcc/sudokutv/` | JVM 测试（规则、编解码、成绩/存档、题库回读） |
 | `app/build.gradle.kts` | `verifyPuzzleBank`（preBuild 检查资产）、`noCompress`、R8 |
 | `PLAN.md` | 阶段计划与实施进度 |
@@ -62,7 +62,9 @@
 - 题库格式：每记录 42 字节 = 81 格 × 4bit + 1 字节评分（评分 × 10）。记录下标 = 题号 − 1；
   题号是单个难度文件内的行号。
 - 题库资产必须 `noCompress`，否则 `AssetManager.openFd` 无法随机定位；读取时一次只读 42 字节。
-- 题库是**固定数据**，不新增、不替换；不要重新引入题库生成流程或外部题库目录依赖。
+- 题库是**固定数据**，不新增、不替换；不要重新引入题库生成流程或外部题库依赖。
+- 每个难度只保留源题库前 20000 题，题号范围固定 `1..20000`；只能按连续前缀裁剪（`openFd` 按 `id-1` 偏移定位，
+  不能抽样）。若要补回高分题，只能追加到文件末尾。
 - 题库资产必须随仓库提交，缺失时 `verifyPuzzleBank` 会在构建前报错。
 - 发布使用 Release APK + 覆盖安装；不要卸载或清数据。
 - 运行时不得新增网络、账号、广告、音频依赖。

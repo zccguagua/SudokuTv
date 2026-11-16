@@ -23,20 +23,23 @@
 全部题目来自 [Sudoku Exchange Puzzle Bank](https://github.com/grantm/sudoku-exchange-puzzle-bank)，
 该数据集由 QQWing 生成、Sukaku Explainer 评分，属于公有领域（Public Domain）。
 
-题库已作为**固定数据**转换并打包在应用内（`app/src/main/assets/bank/*.bin`，约 35.8 MiB），
+题库已作为**固定数据**转换并打包在应用内（`app/src/main/assets/bank/*.bin`，约 3.2 MiB），
 后续不再新增或替换题目，因此项目里不保留题库转换流程，构建也不需要任何外部仓库。
+
+每个难度只保留原题库的**前 20,000 题**，以控制安装包体积；四档合计 80,000 题。
 
 ## 难度与题号
 
 | 难度 | 题库文件 | 评分范围 | 题数 |
 |---|---|---|---:|
-| 简单 | `easy.txt` | 1.2 | 100,000 |
-| 中等 | `medium.txt` | 1.5 – 2.3 | 352,643 |
-| 困难 | `hard.txt` | 2.5 – 4.8 | 321,592 |
-| 专家 | `diabolical.txt` | 5.0 – 9.3 | 119,681 |
+| 简单 | `easy.txt` | 1.2 | 20,000 |
+| 中等 | `medium.txt` | 1.5 – 2.3 | 20,000 |
+| 困难 | `hard.txt` | 2.5 – 4.8 | 20,000 |
+| 专家 | `diabolical.txt` | 5.0 – 9.2 | 20,000 |
 
-题号是该难度题库文件的行号（从 1 开始）。例如「专家 · 第 119681 题」对应
-`diabolical.txt` 第 119681 行。不同难度下相同的题号是完全不同的题目。
+题号取自原题库文件的行号（从 1 开始），沿用最简单的 1–20,000 前缀，因此「专家 · 第 12070 题」
+就是原 `diabolical.txt` 第 12070 行。不同难度下相同的题号是完全不同的题目。取前缀而非
+抽样，是因为 `.bin` 依赖定长偏移随机读，题号必须连续。
 
 ## 遥控器操作
 
@@ -81,7 +84,7 @@
 环境要求：JDK 17、Android SDK 35。
 
 项目是自包含的：题库已经是固定数据并随仓库提交（`app/src/main/assets/bank/*.bin`，
-合计约 35.8 MiB），克隆后直接构建即可，**不需要**另外克隆题库仓库，也没有题库生成步骤。
+合计约 3.2 MiB），克隆后直接构建即可，**不需要**另外克隆题库仓库，也没有题库生成步骤。
 
 ```bash
 ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease

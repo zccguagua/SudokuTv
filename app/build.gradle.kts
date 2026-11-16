@@ -7,6 +7,7 @@ plugins {
 val puzzleBankAssetDir = layout.projectDirectory.dir("src/main/assets/bank")
 val puzzleBankNames = listOf("easy", "medium", "hard", "diabolical")
 val puzzleBankRecordBytes = 42L
+val puzzleBankRetainedCount = 20_000L
 
 val verifyPuzzleBank by tasks.registering {
     group = "puzzle bank"
@@ -16,8 +17,9 @@ val verifyPuzzleBank by tasks.registering {
         puzzleBankNames.forEach { name ->
             val file = File(dir.asFile, "$name.bin")
             check(file.isFile) { "缺少题库资产：${file.path}（应从版本库恢复）" }
-            check(file.length() > 0 && file.length() % puzzleBankRecordBytes == 0L) {
-                "题库资产大小异常：${file.path}（${file.length()} 字节）"
+            check(file.length() == puzzleBankRetainedCount * puzzleBankRecordBytes) {
+                "题库资产题数异常：${file.path}（${file.length()} 字节，应为 " +
+                    "${puzzleBankRetainedCount * puzzleBankRecordBytes} 字节 / $puzzleBankRetainedCount 题）"
             }
         }
     }
@@ -31,8 +33,8 @@ android {
         applicationId = "com.zcc.sudokutv"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
