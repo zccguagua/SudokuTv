@@ -15,6 +15,7 @@
 |---|---|
 | `app/src/main/java/com/zcc/sudokutv/MainActivity.kt` | 承载视图、转发按键、暂停/恢复 |
 | `app/src/main/java/com/zcc/sudokutv/SudokuGameView.kt` | 页面状态机（首页/关卡选择/做题/结算/排行榜）、绘制、触摸与遥控器 |
+| `app/src/main/java/com/zcc/sudokutv/input/GamepadInput.kt` | 手柄按键/摇杆 → 现有键码（AB 确定、XY 菜单、方向键） |
 | `app/src/main/java/com/zcc/sudokutv/model/Puzzle.kt` | `Difficulty`、`Puzzle`、棋盘常量（9×9，3×3 宫） |
 | `app/src/main/java/com/zcc/sudokutv/model/SudokuRules.kt` | 完整盘面校验与冲突格定位 |
 | `app/src/main/java/com/zcc/sudokutv/model/GameProgress.kt` | 单局存档编解码（v1） |
@@ -49,6 +50,10 @@
 - 棋盘固定 9×9、3×3 宫；不要重新引入四宫/六宫或 24 点。
 - 布局以 1920×1080 设计坐标等比居中缩放（`onDraw` 与 `toDesignPoint` 必须使用同一公式）。
 - 数字面板：3×3、默认聚焦 5、底部「清除」；预选面板复用同一网格。
+- 手柄映射：`A/B → KEYCODE_ENTER`，`X/Y → KEYCODE_MENU`，十字键/左摇杆 → `KEYCODE_DPAD_*`；
+  只在按下边沿触发，忽略 `repeatCount > 0`，同一动作 80 ms 内去重。
+- 判断手柄来源必须用 `(source and SOURCE_GAMEPAD) == SOURCE_GAMEPAD`，不能用 `!= 0`
+  （`SOURCE_DPAD` 与 `SOURCE_GAMEPAD` 共享类别位，会误判）。
 - 遥控器拓扑：棋盘最右列按右进入右侧按钮区，按钮区按左回棋盘；其余按键保持与
   `sudoku-assistant-tv` 的九宫一致。
 - 校验时机：只在最后一个空格填满后校验，不做逐格即时判错；题库保证唯一解，因此不需要保存答案。
