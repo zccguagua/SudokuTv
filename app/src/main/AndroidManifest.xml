@@ -6,8 +6,8 @@
     <application
         android:allowBackup="true"
         android:banner="@drawable/tv_brand_banner"
-        android:icon="@drawable/tv_brand_icon"
-        android:roundIcon="@drawable/tv_brand_icon"
+        android:icon="@drawable/tv_sudoku_icon"
+        android:roundIcon="@drawable/tv_sudoku_icon"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.SudokuTv">
