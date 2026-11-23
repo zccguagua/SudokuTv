@@ -34,7 +34,7 @@
 |---|---|
 | 题库规模 | 每难度保留源题库前 20000 题（easy/medium/hard/diabolical 各 20000）；`diabolical#12070` 题面与评分 9.2 回读一致，`#20000` 为末条 |
 | 单元测试 | 29 个用例全部通过（规则、记录解码、存档编解码、成绩/槽位、题库回读） |
-| Release 构建 | `lintRelease` 与 `assembleRelease` 通过；APK 3.65 MB（`versionName 0.2.0` / `versionCode 2`） |
+| Release 构建 | `lintRelease` 与 `assembleRelease` 通过；APK 3.65 MB（`versionName 0.3.0` / `versionCode 3`，`minSdk 19`） |
 | 题库打包 | 4 个 `.bin` 共 3,360,000 字节，均以 stored（未压缩）方式打包，满足 `openFd` 随机读 |
 | 界面冒烟 | 模拟器 1920×1080 下首页与做题页像素采样符合设计（卡片选中态、棋盘、完成度条） |
 
@@ -242,7 +242,7 @@ sudokuTv/
 1. 在 `sudokuTv` 复制源项目的 Gradle 脚手架：`gradlew`、`gradlew.bat`、`gradle/`、`settings.gradle.kts`、
    根 `build.gradle.kts`、`gradle.properties`、`app/build.gradle.kts`、`proguard-rules.pro`。
 2. 全局替换包名 `com.kanayama.sudokuassistant` → `com.zcc.sudokutv`，应用名 `数独`，
-   `versionCode 1` / `versionName 0.1.0`，其余保持 `compileSdk 35 / minSdk 24 / targetSdk 35 / JDK 17`。
+   `versionCode 1` / `versionName 0.1.0`，其余保持 `compileSdk 35 / minSdk 19 / targetSdk 35 / JDK 17`。
 3. 复制资源：`values/{colors,themes}.xml`、`values-v31/themes.xml`、`drawable-nodpi/tv_brand_banner.png`、
    `drawable-nodpi/tv_brand_icon.png`；`AndroidManifest.xml` 保留 leanback 与 landscape。
 4. 写一个只显示「数独」文字的占位 `SudokuGameView` + `MainActivity`，确认能编译、能装到电视。

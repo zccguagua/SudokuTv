@@ -4,7 +4,8 @@
 
 ## 1. 系统概述
 
-- 技术栈：Kotlin、Android 原生 `View` + `Canvas`、`SharedPreferences`、Gradle（AGP 8.7.3 / Kotlin 2.0.21）。
+- 技术栈：Kotlin、Android 原生 `View` + `Canvas`、`SharedPreferences`、Gradle（AGP 8.7.3 / Kotlin 2.0.21）；
+  `minSdk 19`（Android 4.4），主题按 `values`（Holo）/ `values-v21`（Material）/ `values-v31` 分段。
 - 刻意不使用 Compose：目标电视上原生 View 的首键响应更稳定。
 - 只有一个 Activity（`MainActivity`），所有页面由 `SudokuGameView` 自绘并共用一套 1920×1080 设计坐标。
 - 不联网、不登录、无广告、无音频；成绩与进度只存本地。
